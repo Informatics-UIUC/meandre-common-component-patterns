@@ -29,42 +29,14 @@ import org.meandre.core.ComponentExecutionException;
  */
 public abstract class AbstractWebServiceSessionComponent extends
 		AbstractExecutableComponent {
-	//////////////////////// ComponentInputs ///////////////////////////
-	/**
-	 * "HttpServletRequest Object to parse to determine what action to invoke."
-	 *
-	@ComponentInput(
-	description="HttpServletRequest Object to parse to determine what action to invoke.", 
-	name="HttpServletRequest")
-	*/
+	//
+	//
 	public final static String HttpServletRequest = "HttpServletRequest";
-
-	/**
-	 * "HttpServletResponse Object used to add Cookie value to."
-	 *
-	@ComponentInput(
-	description="HttpServletResponse Object used to add Cookie value to.", 
-	name="HttpServletResponse")
-	*/
 	public final static String HttpServletResponse = "HttpServletResponse";
-
-	/**
-	 * "Semaphore Object used to signal wite action complete for event that are handled in this Component."
-	 *
-	@ComponentInput(
-	description="Semaphore Object used to signal wite action complete for event that are handled in this Component.", 
-	name="Semaphore")
-	*/
 	public final static String Semaphore = "Semaphore";
-
-	/**
-	 * "ExecutionInstanceId String; used as Url reference."
-	 *
-	@ComponentInput(
-	description="ExecutionInstanceId String; used as Url reference.", 
-	name="ExecutionInstanceId")
-	*/
 	public final static String ExecutionInstanceId = "ExecutionInstanceId";
+	
+	//////////////////////// ComponentInputs ///////////////////////////
 	
 	/**
 	 * "PackedInputCollection combines all output ports into a java.util.Map<String,Object> to simplify flow building"
@@ -94,10 +66,10 @@ public abstract class AbstractWebServiceSessionComponent extends
 	public final static String OutHttpServletResponse = "HttpServletResponse";
 
 	/**
-	 * "Semaphore Object used to signal wite action complete defaultHomePage or forwarded to component that will act as writter."
+	 * "Semaphore Object used to signal write action complete defaultHomePage or forwarded to component that will act as writter."
 	 */
 	@ComponentOutput(
-	description="Semaphore Object used to signal wite action complete defaultHomePage or forwarded to component that will act as writter.", 
+	description="Semaphore Object used to signal write action complete defaultHomePage or forwarded to component that will act as writter.", 
 	name="Semaphore")
 	public final static String OutSemaphore = "Semaphore";
 
@@ -110,7 +82,7 @@ public abstract class AbstractWebServiceSessionComponent extends
 	public final static String OutExecutionInstanceId = "ExecutionInstanceId";
 
 	/**
-	 * "UniqueSessionKey String; Idenitifies a logic web brwoser session."
+	 * "UniqueSessionKey String; Identifies a logic web browser session."
 	 */
 	@ComponentOutput(
 	description="UniqueSessionKey String; Idenitifies a logic web brwoser session.", 
@@ -127,25 +99,6 @@ public abstract class AbstractWebServiceSessionComponent extends
 	public static final String OutPackedDataComponent = "PackedDataComponent";	
 		
 	////////////////////////// ComponentProperties ///////////////////////////
-	/**
-	 * "HttpServletRequest ParameterName to evaluate for FlowAbortRequest(). default value = shutdownService"
-	 */
-	@ComponentProperty(
-	description="HttpServletRequest ParameterName to evaluate for FlowAbortRequest(). default value = shutdownService" , 
-	name="ShutdownParameterName",
-    defaultValue="ShutdownService"
-    )
-	public static final String ShutdownParameterName = "ShutdownParameterName";	
-
-	/**
-	 * "HttpServletRequest ParameterValue to evaluate for FlowAbortRequest(). default value = true"
-	 */
-	@ComponentProperty(
-	description="HttpServletRequest ParameterValue to evaluate for FlowAbortRequest(). default value = true" , 
-	name="ShutdownParameterValue",
-    defaultValue="true"
-    )
-	public static final String ShutdownParameterValue = "ShutdownParameterValue";	
 
 	/**
 	 * "HttpServletRequest ParameterName to evaluate for ClearSessionKey cache. default value = closeSession"
@@ -313,7 +266,7 @@ public abstract class AbstractWebServiceSessionComponent extends
 			
 			//
 			// Determine first if there is an emptyRequest OR parameterizedRequest.
-			// Assuming some derivative of AbstractWebServiveHeadComponent is being used.
+			// Assuming some derivative of AbstractWebServiceHeadComponent is being used.
 			if( request instanceof EmptyHttpServletRequest ){
 				//
 				// emptyRequest create new sessionKey.
@@ -324,7 +277,7 @@ public abstract class AbstractWebServiceSessionComponent extends
 				response.addCookie(cookie);
 				uniqueSessionKey = cookie.getValue();
 				//
-				// enable hook for handling defaultHomePage reuqest.
+				// enable hook for handling defaultHomePage request.
 				pushDataOut=requestEmptyNewSessionKey( 
 						request, 
 						response, 
@@ -335,7 +288,7 @@ public abstract class AbstractWebServiceSessionComponent extends
 				
 			} else {
 				//
-				// parameterizedReuqest recieved, based on content send response.
+				// parameterizedReuqest received, based on content send response.
 				if(isOutputToConsoleVerbose())
 					getConsoleOut().println(this.getClass().getName() +": Recieved Request With Parameters");
 				
@@ -346,11 +299,11 @@ public abstract class AbstractWebServiceSessionComponent extends
 					if(c.getName().equals(cookieKeyNameValue)){
 						//
 						// do we know this key value 
-						if(sessionKeys.contains(c.getValue())){
+						if(sessionKeys.containsKey(c.getValue())){
 							//
 							// compared the stored values.. now we know the uniqueKey
 							uniqueSessionKey = c.getValue();							
-							long nanoTimeValue = Long.valueOf( (String) sessionTime.get(uniqueSessionKey) );
+							long nanoTimeValue = Long.valueOf( (Long) sessionTime.get(uniqueSessionKey) );
 							//
 							if(isOutputToConsoleVerbose())
 								getConsoleOut().println( this.getClass().getName() +
@@ -402,7 +355,7 @@ public abstract class AbstractWebServiceSessionComponent extends
 				// 
 				if(cookie == null){
 					// could not locate existing session for this guy, start over.
-					// This should mean that an authenicated session would have to be expired.
+					// This should mean that an authenticated session would have to be expired.
 					// TODO: more work here .... required.
 					if(isOutputToConsoleVerbose())
 						getConsoleOut().println( this.getClass().getName() +
@@ -461,36 +414,45 @@ public abstract class AbstractWebServiceSessionComponent extends
 
 	}
 
-	/**
+	/** This method evaluates if the HttpRequest should be handled in this component
 	 * 
+	 * @param request
+	 * @param response
 	 * @param sem
+	 * @param instanceId
+	 * @param uniqueSessionKey
+	 * @return
 	 */
-	public void forceServiceShutdown(Semaphore sem){
+	public boolean handleSessionRequest( 
+			HttpServletRequest request,
+			HttpServletResponse response,
+			Semaphore sem,
+			String instanceId,
+			String uniqueSessionKey
+	){
 		//
-		// Clear all variables..
-		this.sessionKeys.clear();
-		this.sessionTime.clear();
-		this.sessionCounter = 0;
-		this.getCcHandle().requestFlowAbortion();
-		//
-		// wait for the server to inform us that our request was recieved.
-		while (! this.getCcHandle().isFlowAborting()) {
+		// Do the ClearSession evaluation (second example)
+		String clearSessionParameterValue = request.getParameter( 
+				getCcHandle().getProperty(ClearSessionParameterName));
+		
+		if( clearSessionParameterValue !=null 
+			&& clearSessionParameterValue.equalsIgnoreCase( 
+					getCcHandle().getProperty(ClearSessionParameterValue)) 
+		) {
+			//
+			purgeSessionKeys(uniqueSessionKey);
+			//
+			Cookie cookie = new Cookie(CookieKeyNameValue, "sessionClosed" );
+			response.addCookie(cookie);
 			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// do nothing.
+				response.getWriter().println();
+			} catch (IOException e) {
+				// do nothing... 
 			}
+			sem.release();
+			return false;
 		}
-		//
-		// Release the Service we are working for.
-		sem.release();
-		//
-		// Sleep one more second before returning (this is an implicit termination)
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// do nothing.
-		}		
+		return true;
 	}
 	
 	/**
@@ -568,43 +530,6 @@ public abstract class AbstractWebServiceSessionComponent extends
 			String instanceId,
 			String uniqueSessionKey
 	){
-		//
-		// Do the Shutdown evaluation (an example)
-		String shutdownParameterValue = request.getParameter( 
-				getCcHandle().getProperty(ShutdownParameterName));
-		
-		if( shutdownParameterValue !=null 
-			&& shutdownParameterValue.equalsIgnoreCase( 
-					getCcHandle().getProperty(ShutdownParameterValue)) 
-		) {
-			//
-			forceServiceShutdown(sem);
-			return false;
-		}
-		//
-		// Do the ClearSession evaluation (second example)
-		String clearSessionParameterValue = request.getParameter( 
-				getCcHandle().getProperty(ClearSessionParameterName));
-		
-		if( clearSessionParameterValue !=null 
-			&& clearSessionParameterValue.equalsIgnoreCase( 
-					getCcHandle().getProperty(ClearSessionParameterValue)) 
-		) {
-			//
-			purgeSessionKeys(uniqueSessionKey);
-			//
-			Cookie cookie = new Cookie(CookieKeyNameValue, "sessionClosed" );
-			response.addCookie(cookie);
-			try {
-				response.getWriter().println();
-			} catch (IOException e) {
-				// do nothing... 
-			}
-			sem.release();
-			
-			return false;
-		}
-		
 		return true;
 	}
 

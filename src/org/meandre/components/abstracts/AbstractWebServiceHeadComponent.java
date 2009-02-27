@@ -60,9 +60,40 @@ import org.meandre.webui.WebUIFragmentCallback;
  * </p>
  */
 public abstract class AbstractWebServiceHeadComponent extends AbstractExecutableComponent implements
-		WebUIFragmentCallback {
+		/* Configurable */ WebUIFragmentCallback {
 
 	////////////////////////// ComponentProperties ///////////////////////////
+
+	/**
+	 * "HttpServletRequest ParameterName to evaluate for FlowAbortRequest(). default value = shutdownService"
+	 */
+	@ComponentProperty(
+	description="HttpServletRequest ParameterName to evaluate for FlowAbortRequest(). default value = shutdownService" , 
+	name="ShutdownParameterName",
+    defaultValue="ShutdownService"
+    )
+	public static final String ShutdownParameterName = "ShutdownParameterName";	
+
+	/**
+	 * "HttpServletRequest ParameterValue to evaluate for FlowAbortRequest(). default value = true"
+	 */
+	@ComponentProperty(
+	description="HttpServletRequest ParameterValue to evaluate for FlowAbortRequest(). default value = true" , 
+	name="ShutdownParameterValue",
+    defaultValue="true"
+    )
+	public static final String ShutdownParameterValue = "ShutdownParameterValue";	
+
+	/**
+	 * "HttpServletRequest ParameterValue to evaluate for FlowAbortRequest(). default value = true"
+	 */
+	@ComponentProperty(
+	description="Allow HttpServletRequest Parameter to be evaluated in this component (ShutdownService is default operation defined in this component). default value = true" , 
+	name="AllowComponentRequestParser",
+    defaultValue="true"
+    )
+	public static final String AllowComponentRequestParser = "AllowComponentRequestParser";	
+
 	
 	/**
 	 * "Controls the number of milliseconds of sleep between evaluations of ComponentContext.isFlowAborting(), a value of 1000 is approximately 1 second " 
@@ -123,7 +154,7 @@ public abstract class AbstractWebServiceHeadComponent extends AbstractExecutable
 	name="PackedDataComponent"
     )
 	public static final String OutPackedDataComponent = "PackedDataComponent";	
-		
+
 	/* (non-Javadoc)
 	 * @see org.meandre.core.ExecutableComponent#execute(org.meandre.core.ComponentContext)
 	 */
@@ -158,36 +189,31 @@ public abstract class AbstractWebServiceHeadComponent extends AbstractExecutable
        //
 	}
 
-	/* (non-Javadoc)
-	 * @see org.meandre.webui.WebUIFragmentCallback#emptyRequest(javax.servlet.http.HttpServletResponse)
-	 */
 	/**
-	 * empty HttpServletRequest may be recieved at anytime and special prevision has been 
+	 * empty HttpServletRequest may be received at any time and special provision has been 
 	 * made to provide a default behavior in that event. For the General purpose case this
-	 * Component class creates a (java.Lang.Object)null which cast as HttpServletRequest which 
-	 * is then sent with the HttpServletResponse to the this.handle() method to processing. 
-	 * Implicitly this means that the Component designated to recieve the HttpServletRequest
-	 * should be prepared to handle an input event the is an emptyRequest ( or null )
+	 * Component class creates a (org.meandre.components.abstract.util.EmptyHttpServletRequest)  
+	 * which is then sent as the HttpServletResponse to the this.handle() method to processing. 
+	 * Implicitly this means that the Component designated to receive the HttpServletRequest
+	 * should be prepared to handle an input event the is an emptyRequest ( which will be empty )
 	 */
 	public void emptyRequest(HttpServletResponse response) throws WebUIException {
 		if(isOutputToConsole())
 			getConsoleOut().println("EmptyRequest called for: " + this.getClass().getName());
-		    HttpServletRequest request = (HttpServletRequest) new EmptyHttpServletRequest();
-			handle( request, response);
+		//
+	    HttpServletRequest request = (HttpServletRequest) new EmptyHttpServletRequest();
+		handle( request, response);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.meandre.webui.WebUIFragmentCallback#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-	 */
 	/**
 	 * handle all HttpServletRequest (including a potentially emptyRequest), for the General
 	 * Purpose case this method is blindly passing both the HttpServletRequest an the HttpServletResponse
 	 * Object out for processing, in addition a Semaphore is used to hold this method busy (holding 
 	 * open the network connection to the client) which should be sent to the Component that will be 
-	 * writting a response for this request, this lock does not prevent this method from receiving new 
+	 * Writing a response for this request, this lock does not prevent this method from receiving new 
 	 * request (which would come on a different logical thread controlled by the Infrastructure's 
-	 * embedded ApplicationServer). The Writter should execute the Semaphore.release() when it has completed
-	 * the task of making the response which inturn will allow this component (thread) to continue closing
+	 * embedded ApplicationServer). The Writer should execute the Semaphore.release() when it has completed
+	 * the task of making the response which in turn will allow this component (thread) to continue closing
 	 * the logical network connection with the originating client.  
 	 */
 	public void handle(HttpServletRequest request, HttpServletResponse response)
@@ -203,15 +229,30 @@ public abstract class AbstractWebServiceHeadComponent extends AbstractExecutable
             packedDataComponentsOutput.put(httpServletRequest,  request);
             packedDataComponentsOutput.put(httpServletResponse, response);
             packedDataComponentsOutput.put(semaphore, sem);
-            packedDataComponentsOutput.put(executionInstanceId, getCcHandle().getExecutionInstanceID());
+           	packedDataComponentsOutput.put(executionInstanceId, getCcHandle().getExecutionInstanceID());
             //
-            getCcHandle().pushDataComponentToOutput(OutPackedDataComponent,  packedDataComponentsOutput);
+            // If the component property AllowRequestParser is true then Do  
+            if(Boolean.parseBoolean(getCcHandle().getProperty(AllowComponentRequestParser))){
+	            boolean isRequestPropagated = handleServiceRequest(request,response,sem);
+	            if(!isRequestPropagated) 
+	            	return;
+            }
             //
-            getCcHandle().pushDataComponentToOutput(httpServletRequest,  request);
-            getCcHandle().pushDataComponentToOutput(httpServletResponse, response);
-            getCcHandle().pushDataComponentToOutput(semaphore, sem);
-            getCcHandle().pushDataComponentToOutput(executionInstanceId, getCcHandle().getExecutionInstanceID());
+            // The assumption is that the packedDataComponentOutput will be the only output.
+            if(isComponentOutputConnected(OutPackedDataComponent))
+            	getCcHandle().pushDataComponentToOutput(OutPackedDataComponent,  packedDataComponentsOutput);
             //
+            // Support for individual optional output ports for each output type produced in this component. 
+            if(isComponentOutputConnected(httpServletRequest))
+            	getCcHandle().pushDataComponentToOutput(httpServletRequest,  request);
+            if(isComponentOutputConnected(httpServletResponse))            
+            	getCcHandle().pushDataComponentToOutput(httpServletResponse, response);
+            if(isComponentOutputConnected(semaphore))
+            	getCcHandle().pushDataComponentToOutput(semaphore, sem);
+            if(isComponentOutputConnected(executionInstanceId))
+            	getCcHandle().pushDataComponentToOutput(executionInstanceId, getCcHandle().getExecutionInstanceID());
+            //
+            // Causes our service Thread to be blocked until the semaphore is released somewhere in our flow.
             sem.acquire();
             sem.release();
        } catch (InterruptedException e) {
@@ -220,4 +261,63 @@ public abstract class AbstractWebServiceHeadComponent extends AbstractExecutable
             throw new WebUIException(e);
        } 
 	}
+	
+	/**
+	 * 
+	 * @param sem
+	 */
+	public void forceServiceShutdown(Semaphore sem){
+		//
+		// Clear all variables..
+		this.getCcHandle().requestFlowAbortion();
+		//
+		// wait for the server to inform us that our request was received.
+		while (! this.getCcHandle().isFlowAborting()) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// do nothing.
+			}
+		}
+		//
+		// Release the Service we are working for.
+		sem.release();
+		//
+		// Sleep one more second before returning (this is an implicit termination)
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// do nothing.
+		}		
+	}
+
+	/** This method evaluates if the HttpRequest should be handled in this component
+	 *  the return value will be evaluated to determine if the request should be propagated (when true)
+	 *  or not (when false).
+	 * 
+	 * @param request
+	 * @param response
+	 * @param sem
+	 * @return
+	 */
+	public boolean handleServiceRequest( 
+			HttpServletRequest request,
+			HttpServletResponse response,
+			Semaphore sem
+	){
+		//
+		// Do the Shutdown evaluation (an example)
+		String shutdownParameterValue = request.getParameter( 
+				getCcHandle().getProperty(ShutdownParameterName));
+		
+		if( shutdownParameterValue !=null 
+			&& shutdownParameterValue.equalsIgnoreCase( 
+					getCcHandle().getProperty(ShutdownParameterValue)) 
+		) {
+			//
+			forceServiceShutdown(sem);
+			return false;
+		}
+		return true;
+	}	
 }
