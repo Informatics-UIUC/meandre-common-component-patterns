@@ -31,10 +31,15 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
     )
 	public static final String ConsoleOutput = "ConsoleOutput";		
 
+	protected ComponentConsoleOutputHandler accoh = null;
+	//
+	// Should depreciate next 5 variables in favor of using the above object 
 	protected java.io.PrintStream stdoutSaved = null;
 	protected static Logger logger = null;	
 	private static boolean outputToConsole = true;
 	private static boolean outputToConsoleVerbose = false;
+	private static String outputToConsoleLogLevel = "Info";
+	//
 	private ComponentContext ccHandle = null;
 	private Set<String> componentInputConnected = new HashSet<String>();
 	private Set<String> componentOutputConnected = new HashSet<String>();
@@ -67,6 +72,10 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 	 * @param message
 	 */
 	public void writeLogAndPrintStackTrace(Exception e,String message){
+		accoh.writeLogAndPrintStackTrace(e,message);
+	}
+	
+/*	public void writeLogAndPrintStackTrace(Exception e,String message){
 		//
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter( sw );
@@ -81,7 +90,7 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 		getLogger().severe( sw.getBuffer().toString() ); 
 		//
 	}
-	
+*/	
 	/* (non-Javadoc)
 	 * @see org.meandre.core.ExecutableComponent#dispose(org.meandre.core.ComponentContextProperties)
 	 */
@@ -106,41 +115,69 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 	 */
 	public void initialize(ComponentContextProperties ccp)
 			throws ComponentExecutionException, ComponentContextException {
-		logger = ccp.getLogger();
-		logger.info("Initializing " + this.getClass().getName() );
-		//
-		stdoutSaved = ccp.getOutputConsole();
 		
-		String consoleFlag = ccp.getProperty(ConsoleOutput);
-		if( consoleFlag == null){
+		//
+		
+		accoh = 
+			new ComponentConsoleOutputHandler(
+					ccp.getOutputConsole(),
+					ccp.getProperty(ConsoleOutput),
+					ccp.getLogger()
+			);
+		if(accoh == null){
+			logger = ccp.getLogger();
+			logger.warn("Initializing " + 
+					this.getClass().getName()+
+					"Failed to initialize ComponentConsoleOutputHandler" );
+			logger = ccp.getLogger();
+			//
+			// Maybe this should terminate on failure.
+			
+		} else {
+			// 
+			logger = accoh.getLogger();
+			logger.info("Initializing " + this.getClass().getName() );
+			//
+			// Backward compatibility
+			stdoutSaved = accoh.getOutputConsole();
+			outputToConsole = accoh.outputToConsole;
+			outputToConsoleVerbose = accoh.outputToConsoleVerbose;
+			outputToConsoleLogLevel= accoh.outputToConsoleLogLevel;
+		}
+		
+		// stdoutSaved = ccp.getOutputConsole();
+		// String consoleFlag = ccp.getProperty(ConsoleOutput);
+
+/*		if( consoleFlag == null){
 			logger.warning(">>> Initializing " + this.getClass().getName() + 
 					" Found ComponentProperty " + ConsoleOutput + " was returned null; THIS IS UNEXPECTED\n" +
 					" >>> Likely cause is an incomplete RDF Descriptor.  Setting OutputToConsole variables to FALSE");
 			getConsoleOut().println(">>> Initializing " + this.getClass().getName() + 
 					" Found ComponentProperty " + ConsoleOutput + " was returned null; THIS IS UNEXPECTED\n" +
 					" >>> Likely cause is an incomplete RDF Descriptor.  Setting OutputToConsole variables to FALSE");
-			/*
+*/			/*
 			 *  Leaving this for quick review if needed in the future.
 			String s[] = ccp.getPropertyNames();
 			for( int i=0; i<s.length; i++){
 				getStdOutSaved().println(s[i]);
 			}
 			*/
-			//
+/*			//
 			outputToConsole = false;
 			outputToConsoleVerbose = false;
 			//
 		} else {
 			if(consoleFlag.compareToIgnoreCase("on")==0){
 				outputToConsole = true;
-				System.setOut(ccp.getOutputConsole());
 			} else if(consoleFlag.compareToIgnoreCase("verbose")==0){
 				outputToConsole = true;
 				outputToConsoleVerbose = true;
 			} else { 
 				outputToConsole = false;
 			}
+			
 		}
+*/		
 		//
 		String s[] = ccp.getInputNames();
 		for(String p : s)
@@ -235,7 +272,7 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 	}
 
 	public void setOutputToConsoleVerbose(boolean inOutputToConsoleVerbose) {
-		outputToConsoleVerbose = inOutputToConsoleVerbose;
+		return outputToConsoleVerbose = inOutputToConsoleVerbose;
 	}
 
 }
