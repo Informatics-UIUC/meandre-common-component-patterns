@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.meandre.components.util;
+package org.meandre.components.abstracts.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
