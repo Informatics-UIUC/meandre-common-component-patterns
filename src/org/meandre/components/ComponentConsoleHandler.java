@@ -1,12 +1,12 @@
 /**
- * 
+ *
  */
 package org.meandre.components;
 
 import java.io.PrintStream;
 import java.util.logging.Logger;
 
-import org.meandre.components.util.AbstractComponentConsoleOutputHandler;
+import org.meandre.components.abstracts.util.AbstractComponentConsoleOutputHandler;
 
 /**
  * @author bernie acs
@@ -17,7 +17,7 @@ public class ComponentConsoleHandler extends
 
 	/**
 	 * Uses Method from super to implement abstract intialize() call in constructor.
-	 * 
+	 *
 	 * @param console
 	 * @param level
 	 * @param logger
@@ -27,7 +27,7 @@ public class ComponentConsoleHandler extends
 	}
 
 	/**
-	 * 
+	 *
 	 * @param logLevel
 	 * @param message
 	 */
@@ -40,9 +40,9 @@ public class ComponentConsoleHandler extends
 			// ?? print an error when it is not okay to print ??
 		}
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param logLevel
 	 * @param message
 	 */
@@ -55,5 +55,5 @@ public class ComponentConsoleHandler extends
 			// ?? print an error when it is not okay to print ??
 		}
 	}
-	
+
 }
