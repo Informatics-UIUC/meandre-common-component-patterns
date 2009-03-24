@@ -3,8 +3,6 @@
  */
 package org.meandre.components.abstracts;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -143,7 +141,7 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 			stdoutSaved = accoh.getConsoleOut();
 			outputToConsole = accoh.isOutputToConsole();
 			outputToConsoleVerbose = accoh.isOutputToConsoleVerbose();
-			outputToConsoleLogLevel= accoh.getOutputToConsoleLevel();
+			outputToConsoleLogLevel = accoh.getOutputToConsoleLevel();
 		}
 
 		// stdoutSaved = ccp.getOutputConsole();
@@ -272,8 +270,20 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 		return outputToConsoleVerbose;
 	}
 
-	public void setOutputToConsoleVerbose(boolean inOutputToConsoleVerbose) {
-		outputToConsoleVerbose = inOutputToConsoleVerbose;
+	/**
+	 * @param outputToConsoleLogLevel the outputToConsoleLogLevel to set
+	 */
+	public static void setOutputToConsoleLogLevel(
+			String outputToConsoleLogLevel) {
+		AbstractExecutableComponent.outputToConsoleLogLevel = outputToConsoleLogLevel;
 	}
+
+	/**
+	 * @return the outputToConsoleLogLevel
+	 */
+	public static String getOutputToConsoleLogLevel() {
+		return outputToConsoleLogLevel;
+	}
+
 
 }

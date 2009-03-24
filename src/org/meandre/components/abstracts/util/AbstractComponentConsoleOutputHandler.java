@@ -24,7 +24,7 @@ public abstract class AbstractComponentConsoleOutputHandler {
 	protected Logger logger = null;	
 	private static boolean outputToConsole = true;
 	private static boolean outputToConsoleVerbose = false;
-	private static String outputToConsoleLevel = "Info";
+	private String outputToConsoleLevel = "Info";
 	
 	public void initialize(java.io.PrintStream console, String logLevel, Logger logger){
 		this.printStreamHandle = console;
@@ -96,14 +96,14 @@ public abstract class AbstractComponentConsoleOutputHandler {
 	/**
 	 * @return the outputToConsoleLevel
 	 */
-	public static String getOutputToConsoleLevel() {
+	public String getOutputToConsoleLevel() {
 		return outputToConsoleLevel;
 	}
 	
 	/**
 	 * @param outputToConsoleLevel the outputToConsoleLevel to set
 	 */
-	public static void setOutputToConsoleLevel(String outputToConsoleLogLevel) {
+	public void setOutputToConsoleLevel(String outputToConsoleLogLevel) {
 		outputToConsoleLevel = outputToConsoleLogLevel;
 	}
 	
