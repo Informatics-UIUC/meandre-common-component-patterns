@@ -31,7 +31,7 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
     )
 	public static final String ConsoleOutput = "ConsoleOutput";		
 
-	protected ComponentConsoleOutputHandler accoh = null;
+	protected ComponentConsoleHandler accoh = null;
 	//
 	// Should depreciate next 5 variables in favor of using the above object 
 	protected java.io.PrintStream stdoutSaved = null;
