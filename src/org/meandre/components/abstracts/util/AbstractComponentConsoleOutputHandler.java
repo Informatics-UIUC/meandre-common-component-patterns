@@ -9,6 +9,14 @@ import java.util.logging.Logger;
 
 /**
  * @author bernie acs
+ * 
+ * This class should provide all references for handling ConsoleOutput from a central core location.
+ * 
+ * TODO: Add LogLevel validation, consider investigating Logger(toConsole) to more tighly consolidate
+ * with possible methods to allow for both console and/or log to be combined or used seperately.
+ * In this revision this class is concerned with centralizing outputMethods and variables from 
+ * the AbstractExecutableComponent.
+ * 
  *
  */
 public abstract class AbstractComponentConsoleOutputHandler {
