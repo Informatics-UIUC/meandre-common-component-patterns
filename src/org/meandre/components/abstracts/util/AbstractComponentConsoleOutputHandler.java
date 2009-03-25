@@ -22,20 +22,32 @@ import java.util.logging.Logger;
 public abstract class AbstractComponentConsoleOutputHandler {
 	protected java.io.PrintStream printStreamHandle = null;
 	protected Logger logger = null;	
-	private static boolean outputToConsole = true;
-	private static boolean outputToConsoleVerbose = false;
+	private boolean outputToConsole = true;
+	private boolean outputToConsoleVerbose = false;
 	private String outputToConsoleLevel = "Info";
 	
+	/**
+	 * This method contains sets all the relative variable references that should be 
+	 * used during the lifetime of this object. It is expected that implementations would
+	 * create or have some means of using this method in constructor or similar timing.
+	 * 
+	 * @param console
+	 * @param logLevel
+	 * @param logger
+	 */
 	public void initialize(java.io.PrintStream console, String logLevel, Logger logger){
 		this.printStreamHandle = console;
 		this.logger = logger;
 		outputToConsoleLevel = ( logLevel != null)? logLevel: outputToConsoleLevel;
-		if(logLevel.equalsIgnoreCase("Info")){
+		if(outputToConsoleLevel.equalsIgnoreCase("Info")){
 			outputToConsoleVerbose = false;
 			outputToConsole = true;
-		} else if (logLevel.equalsIgnoreCase("Debug")){
+		} else if (outputToConsoleLevel.equalsIgnoreCase("Debug")){
 			outputToConsoleVerbose = true;
 			outputToConsole = true;			
+		} else if (outputToConsoleLevel.equalsIgnoreCase("Off")){
+			outputToConsoleVerbose = false;
+			outputToConsole = false;			
 		}
 	}
 	/**
@@ -58,53 +70,81 @@ public abstract class AbstractComponentConsoleOutputHandler {
 		getLogger().severe( sw.getBuffer().toString() ); 
 		//
 	}
+	/**
+	 * 
+	 * @return
+	 */
 	public java.io.PrintStream getConsoleOut() {
 		return printStreamHandle;
 	}
 
+	/**
+	 * 
+	 * @param stdoutSaved
+	 */
 	public void setConsoleOut(java.io.PrintStream stdoutSaved) {
 		this.printStreamHandle = stdoutSaved;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Logger getLogger() {
-		return logger;
+		return this.logger;
 	}
 
+	/**
+	 * 
+	 * @param inlogger
+	 */
 	public void setLogger(Logger inlogger) {
-		logger = inlogger;
+		this.logger = inlogger;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public boolean isOutputToConsole() {
-		return outputToConsole;
+		return this.outputToConsole;
 	}
 
+	/**
+	 * 
+	 * @param inOutputToConsole
+	 */
 	public void setOutputToConsole(boolean inOutputToConsole) {
-		outputToConsole = inOutputToConsole;
+		this.outputToConsole = inOutputToConsole;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public boolean isOutputToConsoleVerbose() {
-		return outputToConsoleVerbose;
+		return this.outputToConsoleVerbose;
 	}
 
 	/**
 	 * @param inOutputToConsoleVerbose
 	 */
 	public void setOutputToConsoleVerbose(boolean inOutputToConsoleVerbose) {
-		outputToConsoleVerbose = inOutputToConsoleVerbose;
+		this.outputToConsoleVerbose = inOutputToConsoleVerbose;
 	}
 	
 	/**
 	 * @return the outputToConsoleLevel
 	 */
 	public String getOutputToConsoleLevel() {
-		return outputToConsoleLevel;
+		return this.outputToConsoleLevel;
 	}
 	
 	/**
 	 * @param outputToConsoleLevel the outputToConsoleLevel to set
 	 */
 	public void setOutputToConsoleLevel(String outputToConsoleLogLevel) {
-		outputToConsoleLevel = outputToConsoleLogLevel;
+		this.outputToConsoleLevel = outputToConsoleLogLevel;
 	}
 	
 }
