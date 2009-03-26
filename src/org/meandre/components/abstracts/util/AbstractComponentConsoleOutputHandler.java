@@ -56,7 +56,9 @@ public abstract class AbstractComponentConsoleOutputHandler {
 			
 		} catch(IllegalArgumentException iae){
 			//
-			// Probably do not need this more than once.
+			// In this case we should force a hard-code reference to "OFF"
+			outputToConsoleLevel = "OFF" ;
+			setOutputToConsoleLevelInteger(Integer.MAX_VALUE);
 			
 		}
 		//
@@ -157,6 +159,30 @@ public abstract class AbstractComponentConsoleOutputHandler {
 		e.printStackTrace( pw );
 		//
 		return sw.getBuffer().toString();
+	}
+
+	/**
+	 * Compares input logLevel and cause Exception.StackTrace 
+	 * to be output to Console Only
+	 * 
+	 * @param logLevelString
+	 * @param e
+	 */
+	public void whenLogLevelOutputToConsoleOnly(String logLevel,Exception e){
+		String str = getExceptionStackTrace(e );
+		whenLogLevelOutputToConsole(logLevel, str);
+	}
+
+	/**
+	 * Compares input logLevel and cause Exception.StackTrace 
+	 * to be output to Logger Only
+	 * 
+	 * @param logLevelString
+	 * @param e
+	 */
+	public void whenLogLevelOutputToLogOnly(String logLevel,Exception e){
+		String str = getExceptionStackTrace(e );
+		whenLogLevelOutputToLog(logLevel, str);
 	}
 	
 	/**
