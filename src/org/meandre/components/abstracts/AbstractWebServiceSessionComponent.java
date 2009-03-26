@@ -408,7 +408,9 @@ public abstract class AbstractWebServiceSessionComponent extends
 			}
 		}catch(Exception e){
 			String message = this.getClass().getName()+" : Encoutered Error ";
-			super.writeLogAndPrintStackTrace(e, message);
+			// super.writeLogAndPrintStackTrace(e, message);
+			componentConsoleHandler.whenLogLevelOutput(cc.getProperty(ConsoleOutput), e);
+			componentConsoleHandler.whenLogLevelOutput(cc.getProperty(ConsoleOutput), message);
 			throw new ComponentExecutionException(e);
 		}
 
