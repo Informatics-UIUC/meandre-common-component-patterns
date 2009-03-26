@@ -52,7 +52,7 @@ public abstract class AbstractComponentConsoleOutputHandler {
 		try{
 			logLevelObj = getLogLevelObject(outputToConsoleLevel.toUpperCase());
 			outputToConsoleLevel = logLevelObj.getName();
-			outputToConsoleLevelInteger = logLevelObj.intValue();
+			setOutputToConsoleLevelInteger(logLevelObj.intValue());
 			
 		} catch(IllegalArgumentException iae){
 			//
@@ -185,7 +185,7 @@ public abstract class AbstractComponentConsoleOutputHandler {
 	
 	/**
 	 * Compares input logLevel and cause input String 
-	 * to be output to Console Only 
+	 * to be output to Console Only using println() 
 	 * 
 	 * @param logLevel
 	 * @param message
@@ -222,7 +222,7 @@ public abstract class AbstractComponentConsoleOutputHandler {
 		try{
 			logLevelObj = Level.parse(logLevel.toUpperCase());
 		} catch(IllegalArgumentException iae){
-			logLevelObj = Level.parse("ALL");
+			logLevelObj = Level.parse(outputToConsoleLevel);
 		}
 		this.getLogger().log(logLevelObj, message);
 	}
@@ -326,6 +326,20 @@ public abstract class AbstractComponentConsoleOutputHandler {
 	 */
 	public void setOutputToConsoleLevel(String outputToConsoleLogLevel) {
 		this.outputToConsoleLevel = outputToConsoleLogLevel;
+	}
+
+	/**
+	 * @param outputToConsoleLevelInteger the outputToConsoleLevelInteger to set
+	 */
+	public void setOutputToConsoleLevelInteger(int outputToConsoleLevelInteger) {
+		this.outputToConsoleLevelInteger = outputToConsoleLevelInteger;
+	}
+
+	/**
+	 * @return the outputToConsoleLevelInteger
+	 */
+	public int getOutputToConsoleLevelInteger() {
+		return outputToConsoleLevelInteger;
 	}
 	
 }
