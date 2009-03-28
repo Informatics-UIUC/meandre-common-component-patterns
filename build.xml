@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Components-Patterns" default="dist">
+    <!-- Check whether Java 1.5 or Java 1.6 is being used -->
+    <condition property="jdk15or16">
+        <or>
+            <contains string="${java.version}" substring="1.5"/>
+            <contains string="${java.version}" substring="1.6"/>
+        </or>
+    </condition>
+
+    <fail unless="jdk15or16"
+          message="This project requires Java 5 or Java 6. Please set JAVA_HOME to point to where JDK is installed."/>
+
+
+   <!--#################### Project Properties #########################-->
+    <property name="src.dir" value="${basedir}/src"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="dist.dir" value="${basedir}/dist"/>
+    <property name="commons.jar.name" value="components-commons.jar"/>
+
+    <path id="build.classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+    </path>
+
+
+    <!--######################### BUILD TARGETS ###########################-->
+
+    <target name="init">
+        <tstamp>
+            <format property="TIMESTAMP" pattern="MMM d, yyyy h:mm:ssa Z"/>
+        </tstamp>
+    </target>
+
+    <target name="prepare" depends="init" description="-> performs necessary preparation tasks for the build">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <target name="clean" description="-> removes auto-generated files/folders">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare" description="-> compiles the source code">
+        <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="build.classpath" source="1.5"/>
+    </target>
+
+    <target name="dist" depends="compile" description="-> creates Workbench distribution">
+        <jar destfile="${dist.dir}/${commons.jar.name}">
+            <manifest>
+                <attribute name="Build-Date" value="${TIMESTAMP}"/>
+            </manifest>
+            <fileset dir="${build.dir}"/>
+        </jar>
+    </target>
+</project>
+
+<!-- DO NOT EDIT BELOW THIS LINE PLEASE -->
+<!-- vim:sw=4:softtabstop=4:expandtab
+-->
