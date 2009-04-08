@@ -72,8 +72,7 @@ public abstract class AbstractWebServiceTailPrintWriterComponent extends Abstrac
 	 */
 	public void execute(ComponentContext cc)
 			throws ComponentExecutionException, ComponentContextException {
-		super.execute(cc);
-		logger = getLogger();
+		// logger = getLogger();
 		//
 		if(isOutputToConsole())
 			getConsoleOut().println("Execute called for: " + this.getClass().getName());
@@ -104,6 +103,9 @@ public abstract class AbstractWebServiceTailPrintWriterComponent extends Abstrac
             e.printStackTrace(ps);
             
        }
+       //
+       // we need our stuff executed before user executeCallback() is preformed.
+       super.execute(cc);
 	}
 
 }

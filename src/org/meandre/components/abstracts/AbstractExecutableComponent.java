@@ -75,7 +75,7 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 	public void dispose(ComponentContextProperties ccp)
 			throws ComponentExecutionException, ComponentContextException {
 		// getLogger().info("Disposing " + this.getClass().getName());
-		componentConsoleHandler.whenLogLevelOutput("info","Disposing " + this.getClass().getName());
+		componentConsoleHandler.whenLogLevelOutput("info","Dispose called: " + this.getClass().getName());
 //		if(isOutputToConsoleVerbose())
 //			getConsoleOut().println("Disposing " + this.getClass().getName());
 
@@ -109,14 +109,17 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 
 		//
 		// logger = componentConsoleHandler.getLogger();
-		componentConsoleHandler.whenLogLevelOutput("info", "Initializing " + this.getClass().getName() );
+		componentConsoleHandler.whenLogLevelOutput(
+				"info", 
+				"Initize called: " + 
+				this.getClass().getName() 
+		);
 		//
 		// Backward compatibility
-//		stdoutSaved = componentConsoleHandler.getConsoleOut();
-//		outputToConsole = componentConsoleHandler.isOutputToConsole();
-//		outputToConsoleVerbose = componentConsoleHandler.isOutputToConsoleVerbose();
-//		outputToConsoleLogLevel = componentConsoleHandler.getOutputToConsoleLevel();
-
+		//		stdoutSaved = componentConsoleHandler.getConsoleOut();
+		//		outputToConsole = componentConsoleHandler.isOutputToConsole();
+		//		outputToConsoleVerbose = componentConsoleHandler.isOutputToConsoleVerbose();
+		//		outputToConsoleLogLevel = componentConsoleHandler.getOutputToConsoleLevel();
 		//
 		String s[] = ccp.getInputNames();
 		for(String p : s)
@@ -126,10 +129,12 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 		for(String p : s)
 			componentOutputConnected.add(p);
 		//
+		componentInputCache.setComponentConsoleHandler(componentConsoleHandler);
+/*		
 		componentInputCache.setConsoleOut(getConsoleOut());
 		componentInputCache.setOutputToConsole(isOutputToConsole());
 		componentInputCache.setOutputToConsoleVerbose(isOutputToConsoleVerbose());
-		//
+*/		//
 		try{
 			initializeCallBack(ccp);
 		}catch (Exception e){
@@ -150,10 +155,16 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 	public void execute(ComponentContext cc)
 			throws ComponentExecutionException, ComponentContextException {
 		//
-		getLogger().info("Execute called for: " + this.getClass().getName() );
+/*		getLogger().info("Execute called for: " + this.getClass().getName() );
 		//
 		if(componentConsoleHandler.isOutputToConsole())  // outputToConsole)
 			getConsoleOut().println("Execute called for: " + this.getClass().getName());
+*/		//
+		componentConsoleHandler.whenLogLevelOutput(
+				"info", 
+				"Execute called: " + 
+				this.getClass().getName()
+		);
 		//
 		setCcHandle(cc);
 		//

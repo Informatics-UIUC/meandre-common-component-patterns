@@ -42,10 +42,11 @@ public abstract class AbstractComponentInputCache {
 	/**
 	 * 
 	 */
-	private boolean outputToConsole = false;
+/*	private boolean outputToConsole = false;
 	private boolean outputToConsoleVerbose = false;	
 	private PrintStream consoleOut = null;
-
+*/
+	private AbstractComponentConsoleOutputHandler componentConsoleHandler = null;
 	/**
 	 * 
 	 * @param cc
@@ -67,30 +68,55 @@ public abstract class AbstractComponentInputCache {
 			for(int i=0; i< s.length; i++){
 				componentInputPortNames.add(s[i]);
 			}
-			if(isOutputToConsoleVerbose())
+			
+/*			if(isOutputToConsoleVerbose())
 				getConsoleOut().println(this.getClass().getName()+ 
 						" : Initialized ComponentInput Names references");
+*/						
 		}
 		
+		componentConsoleHandler.whenLogLevelOutput(
+				"info", 
+				this.getClass().getName()+ 
+				".put() : Recieved Data Event on "+ dataComponentInputPort +" (Cache/Return)"
+		);
+/*
 		if(isOutputToConsoleVerbose())
 			getConsoleOut().println(this.getClass().getName()+ 
 					".put() : Recieved Data Event on "+ dataComponentInputPort +" (Cache/Return)");
 		
-		//
+*/		//
 		if( ! componentInputPortNames.contains(dataComponentInputPort)){
+			String outputMessage = 
+				this.getClass().getName()+ 
+				".put() : Data Event on "+ dataComponentInputPort +
+				" which appears to be not connected. Simply returning." ;
+			componentConsoleHandler.whenLogLevelOutput("info", outputMessage);
+
+/*
 			if(isOutputToConsoleVerbose())
 				getConsoleOut().println(this.getClass().getName()+ 
 						".put() : Data Event on "+ dataComponentInputPort +
 						" which appears to be not connected. Simply returning.");
+*/						
 			return;
 		}
 		
 		//
 		if(! cc.isInputAvailable(dataComponentInputPort)){
+/*			
 			if(isOutputToConsoleVerbose())
 				getConsoleOut().println(this.getClass().getName()+ 
 						".put() : Data Event on "+ dataComponentInputPort +
 						" which returned false for isInputAvailable(). Simply returning.");
+*/
+			String outputMessage = 
+				this.getClass().getName()+ 
+				".put() : Data Event on "+ 
+				dataComponentInputPort +
+				" which returned false for isInputAvailable(). Simply returning.";
+			
+			componentConsoleHandler.whenLogLevelOutput("info", outputMessage);
 			return;			
 		}
 		
@@ -107,13 +133,18 @@ public abstract class AbstractComponentInputCache {
 		
 		//
 		componentInputQueueNames.put(dataComponentInputPort,queue.size());
+		componentConsoleHandler.whenLogLevelOutput("info", 
+				".put() : Data Event on "+ dataComponentInputPort + 
+				" new Queue size = "+ queue.size() );			
+/*				
+				message);
 		if(isOutputToConsole())
 			getConsoleOut().println(this.getClass().getName()+ 
 					".put() : Data Event on "+ dataComponentInputPort + 
 					" new Queue size = "+ queue.size() );			
 		//
 		//
-	}
+*/	}
 	
 	/**
 	 * 
@@ -130,24 +161,47 @@ public abstract class AbstractComponentInputCache {
 		Queue<Object> queue = null;
 		
 		//
+		this.componentConsoleHandler.whenLogLevelOutputToConsole(
+				"info", 
+				this.getClass().getName()+ 
+				" : Fetching Cached Data Event on "+ 
+				dataComponentInputPort +
+				" (deQueue/Return)"
+		);
+/*		//
 		if(isOutputToConsoleVerbose())
 			getConsoleOut().println(this.getClass().getName()+ " : Fetching Cached Data Event on "+ dataComponentInputPort +" (deQueue/Return)");
 		
-		//
+*/		//
 		if( ! componentInputPortNames.contains(dataComponentInputPort)){
-			if(isOutputToConsoleVerbose())
+/*			if(isOutputToConsoleVerbose())
 				getConsoleOut().println(this.getClass().getName()+ 
 						".get() : Data Event on "+ dataComponentInputPort +
 						" which appears to be not connected. Simply returning.");
+*/			this.componentConsoleHandler.whenLogLevelOutput(
+					"info", 
+					this.getClass().getName()+ 
+					".get() : Data Event on "+ 
+					dataComponentInputPort +
+					" which appears to be not connected. Simply returning."
+			);
 			return null;
 		}
 		
 		//
 		if( ! cacheCollection.containsKey(dataComponentInputPort) ){
-			if(isOutputToConsoleVerbose())
+/*			if(isOutputToConsoleVerbose())
 				getConsoleOut().println(this.getClass().getName()+ 
 						".get() : Data Event on "+ dataComponentInputPort +
-						" which has not cached any values. Simply returning null.");			
+						" which has not cached any values. Simply returning null.");
+			*/			
+			this.componentConsoleHandler.whenLogLevelOutput(
+					"info", 
+					this.getClass().getName()+ 
+					".get() : Data Event on "+ dataComponentInputPort +
+					" which has not cached any values. Simply returning null."
+			);
+			
 			return null;
 		} else {
 			queue = (Queue<Object>) cacheCollection.get(dataComponentInputPort);
@@ -157,10 +211,20 @@ public abstract class AbstractComponentInputCache {
 		//
 		cacheCollection.put(dataComponentInputPort, queue);
 		componentInputQueueNames.put(dataComponentInputPort,queue.size());
-		if(isOutputToConsole())
+/*		if(isOutputToConsole())
 			getConsoleOut().println(this.getClass().getName()+ 
 					".get() : Data Event on "+ dataComponentInputPort + 
-					" new Queue size = "+ queue.size() );			
+					" new Queue size = "+ queue.size() );
+*/					
+		this.componentConsoleHandler.whenLogLevelOutput(
+				"info", 
+				this.getClass().getName()+ 
+				".get() : Data Event on "+ 
+				dataComponentInputPort + 
+				" new Queue size = "+ 
+				queue.size() 
+		);
+		
 		//
 		return returnValue;
 	}
@@ -309,42 +373,60 @@ public abstract class AbstractComponentInputCache {
 	 * @return the outputToConsole
 	 */
 	protected boolean isOutputToConsole() {
-		return outputToConsole;
+		return componentConsoleHandler.isOutputToConsole();
 	}
 
 	/**
 	 * @param outputToConsole the outputToConsole to set
 	 */
 	protected void setOutputToConsole(boolean outputToConsole) {
-		this.outputToConsole = outputToConsole;
+		this.componentConsoleHandler.setOutputToConsole(outputToConsole);
+		//		this.outputToConsole = outputToConsole;
 	}
 
 	/**
 	 * @return the outputToConsoleVerbose
 	 */
 	protected boolean isOutputToConsoleVerbose() {
-		return outputToConsoleVerbose;
+		return componentConsoleHandler.isOutputToConsoleVerbose();
 	}
 
 	/**
 	 * @param outputToConsoleVerbose the outputToConsoleVerbose to set
 	 */
 	protected void setOutputToConsoleVerbose(boolean outputToConsoleVerbose) {
-		this.outputToConsoleVerbose = outputToConsoleVerbose;
+		componentConsoleHandler.setOutputToConsoleVerbose(outputToConsoleVerbose);
+		//		this.outputToConsoleVerbose = outputToConsoleVerbose;
 	}
 
 	/**
 	 * @return the consoleOut
 	 */
 	protected PrintStream getConsoleOut() {
-		return consoleOut;
+		return componentConsoleHandler.getConsoleOut();
 	}
 
 	/**
 	 * @param consoleOut the consoleOut to set
 	 */
 	protected void setConsoleOut(PrintStream consoleOut) {
-		this.consoleOut = consoleOut;
+		this.componentConsoleHandler.setConsoleOut ( consoleOut );
+		// 		this.consoleOut = consoleOut;
+	}
+
+	/**
+	 * @return the componentConsoleHandler
+	 */
+	public AbstractComponentConsoleOutputHandler getComponentConsoleHandler() {
+		return componentConsoleHandler;
+	}
+
+	/**
+	 * @param componentConsoleHandler the componentConsoleHandler to set
+	 */
+	public void setComponentConsoleHandler(
+			AbstractComponentConsoleOutputHandler componentConsoleHandler) {
+		this.componentConsoleHandler = componentConsoleHandler;
 	}
 
 }
