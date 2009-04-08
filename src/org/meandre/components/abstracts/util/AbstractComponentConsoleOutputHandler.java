@@ -195,7 +195,19 @@ public abstract class AbstractComponentConsoleOutputHandler {
 	 */
 	public void whenLogLevelOutput(String logLevel,Exception e){
 		String str = getExceptionStackTrace(e );
+		//
+		boolean undo = false;
+		if (! isOutputToConsoleMirrorToLog()){
+			this.setOutputToConsoleMirrorToLog(true);
+			undo=true;
+		}
+		//
 		whenLogLevelOutput(logLevel, str);
+		//
+		if(undo){
+			this.setOutputToConsoleMirrorToLog(false);
+		}
+		//
 	}
 
 	/**
