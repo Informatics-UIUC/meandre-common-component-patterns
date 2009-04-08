@@ -28,6 +28,7 @@ public abstract class AbstractComponentConsoleOutputHandler {
 	
 	protected java.io.PrintStream printStreamHandle = null;
 	protected Logger logger = null;	
+	private boolean outputToConsoleMirrorToLog = false;
 	private boolean outputToConsole = true;
 	private boolean outputToConsoleVerbose = false;
 	private boolean outputToConsoleAndLog = false;
@@ -206,7 +207,8 @@ public abstract class AbstractComponentConsoleOutputHandler {
 	 */
 	public void whenLogLevelOutput(String logLevel, String message){
 		whenLogLevelOutputToConsole(logLevel, message);
-		whenLogLevelOutputToLog(logLevel, message);
+		if(outputToConsoleMirrorToLog)
+			whenLogLevelOutputToLog(logLevel, message);
 	}
 	
 	/**
@@ -366,6 +368,20 @@ public abstract class AbstractComponentConsoleOutputHandler {
 	 */
 	public int getOutputToConsoleLevelInteger() {
 		return outputToConsoleLevelInteger;
+	}
+
+	/**
+	 * @return the outputToConsoleMirrorToLog
+	 */
+	public boolean isOutputToConsoleMirrorToLog() {
+		return outputToConsoleMirrorToLog;
+	}
+
+	/**
+	 * @param outputToConsoleMirrorToLog the outputToConsoleMirrorToLog to set
+	 */
+	public void setOutputToConsoleMirrorToLog(boolean outputToConsoleMirrorToLog) {
+		this.outputToConsoleMirrorToLog = outputToConsoleMirrorToLog;
 	}
 	
 }

@@ -26,12 +26,21 @@ import org.meandre.core.ExecutableComponent;
 public abstract class AbstractExecutableComponent implements ExecutableComponent {
 
 	@ComponentProperty(
-	description="Controls ConsoleOutput during runtime; values maybe (off, on, verbose)" ,
+	description="Controls ConsoleOutput during runtime; values maybe:\n"+
+				"(off, on, verbose, all, fine, finer, finest ,config, sever, warn)" ,
 	name="ConsoleOutput",
     defaultValue="off"
     )
 	public static final String ConsoleOutput = "ConsoleOutput";
 
+	@ComponentProperty(
+	description="Controls ConsoleOutput should be mirrored Logger() facility on server; values maybe:\n"+
+				"(true = {do mirror output} | anyother value = {do not mirror output} )" ,
+	name="ConsoleOutputMiirorToLogs",
+    defaultValue="off"
+    )
+	public static final String ConsoleOutputMiirorToLogs = "ConsoleOutputMiirorToLogs";
+	
 	protected ComponentConsoleHandler componentConsoleHandler = null;
 	//
 	// Should depreciate next 5 variables in favor of using the above object
@@ -106,7 +115,13 @@ public abstract class AbstractExecutableComponent implements ExecutableComponent
 					ccp.getProperty(ConsoleOutput),
 					ccp.getLogger()
 			);
-
+		// 
+		// patch in new property option for mirror to logs
+		componentConsoleHandler.setOutputToConsoleMirrorToLog(
+				Boolean.parseBoolean(
+						ccp.getProperty(ConsoleOutputMiirorToLogs)
+				)
+		);
 		//
 		// logger = componentConsoleHandler.getLogger();
 		componentConsoleHandler.whenLogLevelOutput(
